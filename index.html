@@ -1,0 +1,283 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Bamboozle-Style Food Challenge</title>
+  <link rel="icon" type="image/png" href="25.png">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f4f4f4;
+      color: #333;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 3em;
+      margin-bottom: 10px;
+    }
+    h2 {
+      margin-bottom: 40px;
+    }
+    .flags {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin-bottom: 30px;
+    }
+    .flags img {
+      width: 80px;
+      height: auto;
+      border-radius: 8px;
+    }
+    .teams {
+      display: flex;
+      justify-content: center;
+      gap: 100px;
+      margin-bottom: 40px;
+    }
+    .team {
+      font-size: 1.2em;
+      font-weight: bold;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 20px;
+      max-width: 1000px;
+      margin: auto;
+    }
+    .tile {
+      background: #008080;
+      color: #fff;
+      padding: 30px;
+      font-size: 1.5em;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .tile:hover {
+      background: #006666;
+    }
+    .tile.answered {
+      background: #aaa;
+      pointer-events: none;
+      opacity: 0.5;
+    }
+    .question-box {
+      display: none;
+      background: #fff;
+      color: #333;
+      padding: 30px;
+      border-radius: 12px;
+      max-width: 600px;
+      margin: 30px auto;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+    input[type="text"] {
+      padding: 10px;
+      width: 80%;
+      font-size: 1em;
+      margin-top: 20px;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 1em;
+      border: none;
+      border-radius: 8px;
+      background-color: #00c292;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #009874;
+    }
+    .answer-text {
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    .footer {
+      margin-top: 40px;
+      font-size: 0.9em;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <h1>Taste the Culture</h1>
+  <h2>Food Challenge: Team vs Team</h2>
+
+  <div class="flags">
+   <link rel="icon" type="image/png" href="25.png">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/f/fe/Flag_of_Egypt.svg" alt="Egypt">
+    <img src="https://upload.wikimedia.org/wikipedia/en/c/c3/Flag_of_France.svg" alt="France">
+  </div>
+
+  <div>
+    <input type="text" id="teamAInput" placeholder="Enter Team A Name">
+    <input type="text" id="teamBInput" placeholder="Enter Team B Name">
+    <button onclick="setTeamNames()">Start Game</button>
+  </div>
+
+  <div class="teams">
+    <div class="team" id="teamA">Team A</div>
+    <div class="team" id="teamB">Team B</div>
+  </div>
+
+  <div class="grid" id="tilesGrid"></div>
+
+  <div class="question-box" id="questionBox">
+    <h2 id="questionText"></h2>
+    <input type="text" id="userAnswer" placeholder="Type your answer here...">
+    <button onclick="revealAnswer()">Submit</button>
+    <div class="answer-text" id="answerText"></div>
+    <button onclick="closeQuestion()">Close</button>
+  </div>
+
+  <div class="footer">
+    Website Made By: hamza3abdallahalsharif-a5o khadija3abdallahalsharif-
+  </div>
+
+  <script>
+    const questions = [
+      { q: "Which country is famous for making Koshari?", a: "Egypt", points: 25 },
+      { q: "Tacos originated from which country?", a: "Mexico", points: 25 },
+      { q: "Which country is known for Ratatouille?", a: "France", points: 25 },
+      { q: "What is the main ingredient in Guacamole?", a: "Avocado", points: 25 },
+      { q: "Which cuisine includes dishes like Ful Medames and Molokhia?", a: "Egyptian", points: 25 },
+      { q: "Which sweet French pastry is buttery and crescent-shaped?", a: "Croissant", points: 50 },
+      { q: "What spicy sauce, often made from tomatoes and chili peppers, is a staple in Mexican cuisine?", a: "Salsa", points: 50 },
+      { q: "Baguette is a traditional bread from which country?", a: "France", points: 25 },
+      { q: "Which Egyptian dish is made of rice, lentils, pasta, and chickpeas?", a: "Koshari", points: 25 },
+      { q: "What is the name of the flatbread commonly used in Mexican food?", a: "Tortilla", points: 25 },
+      { q: "Which creamy dessert is a French specialty?", a: "Crème brûlée", points: 50 },
+      { q: "Which Mexican food is usually wrapped in a corn husk and steamed?", a: "Tamale", points: 50 },
+      { q: "What is the French name for a dish made with snails?", a: "Escargot", points: 75 },
+      { q: "Which Egyptian soup is made with jute leaves?", a: "Molokhia", points: 50 },
+      { q: "What is a common cheese used in Mexican quesadillas?", a: "Oaxaca", points: 50 },
+      { q: "Which French cheese is known for its blue veins?", a: "Roquefort", points: 75 },
+      { q: "Which Egyptian sweet is made of layers of pastry and honey or syrup?", a: "Basbousa", points: 50 },
+      { q: "Which type of crepe is usually filled with sugar, fruits, or Nutella?", a: "Sweet crepe", points: 25 },
+      { q: "Which dish is traditionally eaten in Mexico on Día de los Muertos?", a: "Pan de muerto", points: 75 },
+      { q: "Which French bread is long and thin and commonly found in bakeries?", a: "Baguette", points: 25 },
+      { q: "Power-Up: Other team wins 25 points", a: "POWERUP25", points: 0 },
+      { q: "Power-Up: Swap Points", a: "SWAP", points: 0 },
+      { q: "Power-Up: Reset All Points", a: "RESET", points: 0 }
+    ];
+
+    let currentQuestionIndex = 0;
+    const answeredTiles = new Set();
+    let teamScores = { A: 0, B: 0 };
+    let currentTeam = 'A';
+
+    function createTiles() {
+      const grid = document.getElementById("tilesGrid");
+      for (let i = 0; i < questions.length; i++) {
+        const tile = document.createElement("div");
+        tile.className = "tile";
+        tile.textContent = i + 1;
+        tile.onclick = () => showQuestion(i, tile);
+        grid.appendChild(tile);
+      }
+    }
+
+    function showQuestion(index, tileElement) {
+      if (answeredTiles.has(index)) return;
+      currentQuestionIndex = index;
+      document.getElementById("questionText").textContent = questions[index].q;
+      document.getElementById("answerText").textContent = "";
+      document.getElementById("userAnswer").value = "";
+      document.getElementById("questionBox").style.display = "block";
+      tileElement.classList.add("answered");
+      answeredTiles.add(index);
+    }
+
+    function revealAnswer() {
+      const userAnswer = document.getElementById('userAnswer').value.trim();
+      const q = questions[currentQuestionIndex];
+      let feedback = "";
+
+      if (userAnswer.toLowerCase() === "idk") {
+        feedback = "❌ You said IDK. No more attempts!";
+      } else if (q.a === "POWERUP25") {
+        teamScores[currentTeam === 'A' ? 'B' : 'A'] += 25;
+        feedback = `✅ Power-Up Activated! Other team wins 25 points.`;
+      } else if (q.a === "SWAP") {
+        [teamScores.A, teamScores.B] = [teamScores.B, teamScores.A];
+        feedback = `✅ Power-Up Activated! Points swapped.`;
+      } else if (q.a === "RESET") {
+        teamScores.A = 0;
+        teamScores.B = 0;
+        feedback = `✅ Power-Up Activated! All points reset.`;
+      } else if (userAnswer.toLowerCase() === q.a.toLowerCase()) {
+        teamScores[currentTeam] += q.points;
+        feedback = `✅ Correct! You gained ${q.points} points.`;
+      } else {
+        feedback = `❌ Incorrect. Correct Answer: ${q.a}`;
+      }
+
+      document.getElementById('answerText').textContent = feedback;
+      currentTeam = currentTeam === 'A' ? 'B' : 'A';
+    }
+
+    function closeQuestion() {
+      document.getElementById('questionBox').style.display = 'none';
+      if (answeredTiles.size === questions.length) {
+        const winner = teamScores.A > teamScores.B ? document.getElementById('teamA').textContent : document.getElementById('teamB').textContent;
+        alert(`Game Over! Winner is ${winner} with ${Math.max(teamScores.A, teamScores.B)} points.`);
+      }
+    }
+
+    function setTeamNames() {
+      const teamA = document.getElementById('teamAInput').value || "Team A";
+      const teamB = document.getElementById('teamBInput').value || "Team B";
+      document.getElementById('teamA').textContent = teamA;
+      document.getElementById('teamB').textContent = teamB;
+      document.getElementById('teamAInput').value = "";
+      document.getElementById('teamBInput').value = "";
+    }
+
+    window.onload = createTiles;
+  </script>
+<!-- Code injected by live-server -->
+<script>
+	// <![CDATA[  <-- For SVG support
+	if ('WebSocket' in window) {
+		(function () {
+			function refreshCSS() {
+				var sheets = [].slice.call(document.getElementsByTagName("link"));
+				var head = document.getElementsByTagName("head")[0];
+				for (var i = 0; i < sheets.length; ++i) {
+					var elem = sheets[i];
+					var parent = elem.parentElement || head;
+					parent.removeChild(elem);
+					var rel = elem.rel;
+					if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+						var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+						elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+					}
+					parent.appendChild(elem);
+				}
+			}
+			var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+			var address = protocol + window.location.host + window.location.pathname + '/ws';
+			var socket = new WebSocket(address);
+			socket.onmessage = function (msg) {
+				if (msg.data == 'reload') window.location.reload();
+				else if (msg.data == 'refreshcss') refreshCSS();
+			};
+			if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+				console.log('Live reload enabled.');
+				sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+			}
+		})();
+	}
+	else {
+		console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+	}
+	// ]]>
+</script>
+</body>
+</html>
